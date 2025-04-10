@@ -1,8 +1,8 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { HeartIcon, HomeIcon, StarIcon } from "lucide-react";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "./_ui/sidebar";
-import { usePathname } from "next/navigation";
 
 const items = [
   {
