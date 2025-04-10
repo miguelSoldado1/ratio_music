@@ -9,9 +9,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
-        <div className="flex w-full items-center gap-2 overflow-hidden rounded-md my-2 text-left text-sm ">
+        <div className="flex w-full justify-center my-2">
           <Image src="/ratio-logo.svg" alt="Ratio Logo" width={32} height={32} />
-          <span className="text-lg font-bold">Ratio Music</span>
         </div>
       </SidebarHeader>
       <SidebarContent>
