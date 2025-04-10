@@ -1,7 +1,7 @@
 import { Separator } from "@/components/_ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/_ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
 import { SearchBar } from "@/components/search-bar";
-import { AppSidebar } from "../components/app-sidebar";
 
 export default async function Page() {
   return (
