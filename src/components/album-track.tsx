@@ -8,12 +8,12 @@ interface AlbumTrackProps {
 
 export function AlbumTrack({ track, index }: AlbumTrackProps) {
   return (
-    <li className="hover:text-muted-foreground flex items-center justify-between px-3 py-2 transition-colors">
-      <div className="flex items-center gap-4">
+    <li className="hover:text-muted-foreground flex items-center justify-between px-3 py-1 transition-colors">
+      <div className="flex items-center gap-2">
         <div className="text-muted-foreground w-8 text-center">{index}</div>
         <div>
           <div>{track.name}</div>
-          <div className="text-muted-foreground mt-0.5 text-xs">
+          <div className="text-muted-foreground text-sm">
             {track.artists.map((artist, index) => (
               <span key={artist.id}>
                 <span className="hover:text-primary cursor-pointer hover:underline">{artist.name}</span>
