@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/_ui/tabs";
+import { AlbumReviews } from "@/components/album-reviews";
 import { AlbumTrack } from "@/components/album-track";
 import { ReviewCard } from "@/components/review-card";
 import { DatePrecision } from "@/enums";
@@ -10,7 +11,8 @@ interface AlbumPageProps {
 }
 
 export default async function AlbumPage({ params }: AlbumPageProps) {
-  const album = await getFullAlbum((await params).albumId);
+  const albumId = (await params).albumId;
+  const album = await getFullAlbum(albumId);
 
   return (
     <main className="mx-8 space-y-4">
@@ -38,7 +40,11 @@ export default async function AlbumPage({ params }: AlbumPageProps) {
             <TabsTrigger value="reviews">Reviews</TabsTrigger>
             <TabsTrigger value="tracks">Tracks</TabsTrigger>
           </TabsList>
-          <TabsContent value="reviews"></TabsContent>
+          <TabsContent value="reviews">
+            <div className="space-y-4">
+              <AlbumReviews albumId={albumId} />
+            </div>
+          </TabsContent>
           <TabsContent value="tracks">
             <div className="space-y-4">
               <ol className="divide-y">

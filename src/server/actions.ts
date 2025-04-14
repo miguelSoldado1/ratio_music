@@ -38,16 +38,3 @@ export async function getFullAlbum(albumId: string): Promise<FullAlbumResult> {
     })),
   };
 }
-
-interface ReviewSubmission {
-  albumId: string;
-  rating: number;
-  review: string;
-}
-
-export async function submitReview({ albumId, rating, review }: ReviewSubmission) {
-  // TODO: Implement review storage in database
-
-  console.log("Review submitted:", { albumId, rating, review });
-  return { success: true };
-}

@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useState, useTransition } from "react";
-import { submitReview } from "@/server/actions";
+import { useMutation, useQuery } from "convex/react";
 import { MessageSquareIcon } from "lucide-react";
+import { api } from "../../convex/_generated/api";
 import { Button } from "./_ui/button";
 import { Textarea } from "./_ui/textarea";
-import { AlbumRating } from "./album-rating";
+import { StarRating } from "./star-rating";
+import { StarRatingDisplay } from "./star-rating-display";
 
 interface ReviewFormState {
   rating: number | null;
@@ -21,7 +23,9 @@ interface ReviewCardProps {
 
 export function ReviewCard({ albumId }: ReviewCardProps) {
   const [formState, setFormState] = useState<ReviewFormState>({ rating: null, review: "" });
+  const submitReview = useMutation(api.review.createReview);
   const [isPending, startTransition] = useTransition();
+  const review = useQuery(api.review.hasUserReviewedAlbum, { albumId, userId: "test" });
 
   async function handleSubmit(e: React.FormEvent) {
     const { rating } = formState;
@@ -31,15 +35,8 @@ export function ReviewCard({ albumId }: ReviewCardProps) {
 
     startTransition(async () => {
       try {
-        await submitReview({
-          albumId,
-          rating,
-          review: formState.review,
-        });
-        setFormState({
-          rating: null,
-          review: "",
-        });
+        await submitReview({ albumId, rating, text: formState.review, userId: "test" });
+        setFormState({ rating: null, review: "" });
       } catch (error) {
         console.error("Failed to submit review:", error);
       }
@@ -50,10 +47,25 @@ export function ReviewCard({ albumId }: ReviewCardProps) {
     setFormState((prev) => ({ ...prev, [field]: value }));
   }
 
+  if (review) {
+    return (
+      <div className="h-fit w-lg rounded-lg border p-6">
+        <h3 className="mb-4 text-xl font-bold">You&apos;ve already rated this album!</h3>
+        <div className="text-muted-foreground flex items-center gap-3">
+          <StarRatingDisplay rating={review.rating} sizeClassName="size-4" />
+          <span className="text-primary font-medium">{review.rating}</span>
+        </div>
+        <p className="text-muted-foreground">
+          You can only rate an album once. If you want to rate this album again, please remove your previous rating.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit} className="h-fit w-lg rounded-lg border p-6">
       <h3 className="mb-4 text-xl font-bold">Rate this Album</h3>
-      <AlbumRating value={formState.rating} onChange={(rating) => updateFormState("rating", rating)} />
+      <StarRating value={formState.rating} onChange={(rating) => updateFormState("rating", rating)} />
       <div className="my-4 h-px" />
       <div className="space-y-4">
         <h4 className="font-medium">Write a Review</h4>
