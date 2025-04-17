@@ -5,6 +5,7 @@ import { Redis } from "@upstash/redis";
 import SpotifyWebApi from "spotify-web-api-node";
 
 const TOKEN_KEY = "spotify_access_token";
+const TOKEN_BUFFER = 60;
 
 const spotifyApi = new SpotifyWebApi({
   clientId: env.SPOTIFY_CLIENT_ID,
@@ -13,23 +14,47 @@ const spotifyApi = new SpotifyWebApi({
 
 const redis = Redis.fromEnv();
 
+type CachedToken = {
+  token: string;
+  expiresAt: number;
+};
+
+let inMemoryToken: CachedToken | null = null;
+
 async function getAccessToken() {
+  const now = Date.now() / 1000;
+
+  if (inMemoryToken && now < inMemoryToken.expiresAt - TOKEN_BUFFER) {
+    return inMemoryToken.token;
+  }
+
+  const accessToken = await redis.get<string>(TOKEN_KEY);
+  if (accessToken) {
+    const ttl = await redis.ttl(TOKEN_KEY);
+    const expiresAt = now + (ttl > 0 ? ttl : 0);
+    inMemoryToken = { token: accessToken, expiresAt };
+    return accessToken;
+  }
+
   try {
-    const accessToken = await redis.get<string>(TOKEN_KEY);
-    if (accessToken) {
-      return accessToken;
-    }
-
     const authData = await spotifyApi.clientCredentialsGrant();
-    await redis.set(TOKEN_KEY, authData.body.access_token, { ex: authData.body.expires_in });
+    const expiresIn = authData.body.expires_in;
 
+    const bufferedExpiry = expiresIn - TOKEN_BUFFER;
+    const expiresAt = now + bufferedExpiry;
+
+    inMemoryToken = { token: authData.body.access_token, expiresAt };
+
+    await redis.set(TOKEN_KEY, authData.body.access_token, { ex: bufferedExpiry });
     console.log("Refreshed access token and stored in KV.");
+
     return authData.body.access_token;
   } catch (error) {
     console.error("Error refreshing access token:", error);
     return null;
   }
 }
+
 async function setAccessToken() {
   const accessToken = await getAccessToken();
   if (!accessToken) {
